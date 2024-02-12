@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package some.organised.stucture;
+package some.organised.structure;
 public class Util {
     public static void handyMethod() {
         System.out.println("with a SEPARATE handy method from a PACKAGE");
