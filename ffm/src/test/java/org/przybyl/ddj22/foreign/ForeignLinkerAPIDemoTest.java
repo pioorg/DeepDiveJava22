@@ -34,7 +34,7 @@ class ForeignLinkerAPIDemoTest {
         Assertions.assertTrue(jarPath.toFile().exists(), "The JAR file has to exist first");
         var jar = MountableFile.forHostPath(jarPath);
 
-        try (var container = new GenericContainer<>("openjdk:21-slim")
+        try (var container = new GenericContainer<>("openjdk:22-slim")
             .withCopyFileToContainer(jar, "/tmp/test.jar")
             .withExposedPorts(8000)
             .withCommand("jwebserver")) {
@@ -42,7 +42,7 @@ class ForeignLinkerAPIDemoTest {
             container.start();
 
             Assertions.assertDoesNotThrow(() -> {
-                var result = container.execInContainer("java", "--enable-preview", "-jar", "/tmp/test.jar");
+                var result = container.execInContainer("java", "-jar", "/tmp/test.jar");
                 Assertions.assertNotEquals(0, result.getExitCode());
                 Assertions.assertTrue(result.getStderr().contains("Oh no, don't run me as root"));
             });
