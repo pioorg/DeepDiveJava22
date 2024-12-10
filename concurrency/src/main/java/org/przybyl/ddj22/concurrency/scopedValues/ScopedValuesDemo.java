@@ -19,12 +19,11 @@ package org.przybyl.ddj22.concurrency.scopedValues;
 
 import java.util.Random;
 import java.util.concurrent.StructuredTaskScope;
-import java.util.concurrent.atomic.AtomicInteger;
 
 // Don't forget ot use --enable-preview
 public class ScopedValuesDemo {
 
-    static final ScopedValue<AtomicInteger> SECURITY_CLEARANCE_LEVEL = ScopedValue.newInstance();
+    static final ScopedValue<Integer> SECURITY_CLEARANCE_LEVEL = ScopedValue.newInstance();
 
     public static void main(String[] args) {
 
@@ -32,12 +31,12 @@ public class ScopedValuesDemo {
 
         var voyager = new Starship();
 
-        ScopedValue.where(SECURITY_CLEARANCE_LEVEL, new AtomicInteger(level))
+        ScopedValue.where(SECURITY_CLEARANCE_LEVEL, level)
             .run(() -> {
                 doSomeStuffOn(voyager);
 
                 System.out.println(" -- let's jail current character");
-                ScopedValue.where(SECURITY_CLEARANCE_LEVEL, new AtomicInteger(level))
+                ScopedValue.where(SECURITY_CLEARANCE_LEVEL, levelForPrisoner())
                     .run(() -> doSomeStuffOn(voyager));
 
                 System.out.println(" -- and let's try again");
@@ -48,7 +47,7 @@ public class ScopedValuesDemo {
     }
 
     private static void doSomeStuffOn(Starship starship) {
-        System.out.println("Acting with security clearance level " + SECURITY_CLEARANCE_LEVEL.orElse(new AtomicInteger(-1)));
+        System.out.println("Acting with security clearance level " + SECURITY_CLEARANCE_LEVEL.orElse(-1));
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             scope.fork(starship::turnLightsOn);
             scope.fork(() -> starship.locateCrewMember("Tuvok"));
@@ -72,13 +71,12 @@ public class ScopedValuesDemo {
         Random deckGen = new Random();
 
         boolean turnLightsOn() {
-            SECURITY_CLEARANCE_LEVEL.get().set(50);
             System.out.println("Lights on");
             return true;
         }
 
         boolean blockBridgeControls() {
-            if (SECURITY_CLEARANCE_LEVEL.isBound() && SECURITY_CLEARANCE_LEVEL.get().get() >= 10) {
+            if (SECURITY_CLEARANCE_LEVEL.isBound() && SECURITY_CLEARANCE_LEVEL.get() >= 10) {
                 System.out.println("Bridge controls blocked");
                 return true;
             } else {
@@ -88,8 +86,8 @@ public class ScopedValuesDemo {
         }
 
         boolean locateCrewMember(String name) {
-            if (SECURITY_CLEARANCE_LEVEL.isBound() && SECURITY_CLEARANCE_LEVEL.get().get() >= 2) {
-                System.out.println(STR."Crew member \{name} is on deck \{deckGen.nextInt(1, 17)}");
+            if (SECURITY_CLEARANCE_LEVEL.isBound() && SECURITY_CLEARANCE_LEVEL.get() >= 2) {
+                System.out.printf("Crew member %s is on deck %d%n", name, deckGen.nextInt(1, 17));
                 return true;
             } else {
                 System.out.println("Insufficient security level");
@@ -98,3 +96,4 @@ public class ScopedValuesDemo {
         }
     }
 }
+

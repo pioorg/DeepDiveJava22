@@ -29,7 +29,7 @@ public class ForeignLinkerAPIDemo {
 
     public static void main(String[] args) throws Throwable {
 
-        short uid = getUid();
+        int uid = getUid();
         System.out.println("Running with UID " + uid);
 
         if (isRoot(uid)) {
@@ -40,18 +40,18 @@ public class ForeignLinkerAPIDemo {
 
     }
 
-    private static short getUid() throws Throwable {
+    private static int getUid() throws Throwable {
         // calling https://man7.org/linux/man-pages/man2/geteuid.2.html
         var nativeLinker = Linker.nativeLinker();
         var stdlib = nativeLinker.defaultLookup();
         var getuid = stdlib.find("getuid")
             .orElseThrow(() -> new IllegalStateException("Cannot find `getuid`"));
-        var funcDesc = FunctionDescriptor.of(ValueLayout.JAVA_SHORT);
+        var funcDesc = FunctionDescriptor.of(ValueLayout.JAVA_INT);
         var getuidHandle = nativeLinker.downcallHandle(getuid, funcDesc);
-        return (short) getuidHandle.invoke();
+        return (int) getuidHandle.invoke();
     }
 
-    private static boolean isRoot(short uid) {
+    private static boolean isRoot(int uid) {
         return uid == 0;
     }
 
